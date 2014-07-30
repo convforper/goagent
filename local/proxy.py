@@ -698,10 +698,15 @@ class GAEProxyHandler(MultipleConnectionMixin, SimpleProxyHandler):
         self.__class__.handler_plugins['gae'] = GAEFetchPlugin(common.GAE_APPIDS, common.GAE_PASSWORD, common.GAE_PATH, common.GAE_MODE, common.GAE_KEEPALIVE, common.GAE_OBFUSCATE, common.GAE_PAGESPEED, common.GAE_VALIDATE, common.GAE_OPTIONS)
 
     def gethostbyname2(self, hostname):
-        for postfix in ('.appspot.com', '.googleusercontent.com'):
-            if hostname.endswith(postfix):
-                host = common.HOST_MAP.get(hostname) or common.HOST_POSTFIX_MAP[postfix]
+        if '.google' in hostname or hostname.endswith('.appspot.com'):
+            if hostname in common.HOST_MAP:
+                host = common.HOST_MAP[hostname]
                 return common.IPLIST_MAP.get(host) or host.split('|')
+            elif hostname.endswith(common.HOST_POSTFIX_ENDSWITH):
+                for postfix in common.HOST_POSTFIX_MAP:
+                    if hostname.endswith(postfix):
+                        host = common.HOST_POSTFIX_MAP[postfix]
+                        return common.IPLIST_MAP.get(host) or host.split('|')
         return MultipleConnectionMixin.gethostbyname2(self, hostname)
 
 
